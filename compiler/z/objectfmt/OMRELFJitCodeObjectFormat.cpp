@@ -19,6 +19,8 @@
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0 OR GPL-2.0 WITH Classpath-exception-2.0 OR LicenseRef-GPL-2.0 WITH Assembly-exception
  *******************************************************************************/
 
+#include "codegen/CCData.hpp"
+#include "codegen/CCData_inlines.hpp"
 #include "codegen/CodeGenerator.hpp"
 #include "codegen/MemoryReference.hpp"
 #include "il/MethodSymbol.hpp"
@@ -28,6 +30,7 @@
 #include "objectfmt/GlobalFunctionCallData.hpp"
 #include "objectfmt/JitCodeObjectFormat.hpp"
 #include "objectfmt/ELFJitCodeObjectFormat.hpp"
+#include "runtime/CodeCache.hpp"
 #include "runtime/CodeCacheManager.hpp"
 #include "runtime/Runtime.hpp"
 #include "z/codegen/S390GenerateInstructions.hpp"
@@ -51,8 +54,11 @@ OMR::Z::ELFJitCodeObjectFormat::emitGlobalFunctionCall(TR::GlobalFunctionCallDat
    TR::Node *callNode = data.callNode;
    TR_ASSERT_FATAL(targetAddress != NULL, "Unable to make a call for n%dn %s as targetAddress for the Call is not found.", callNode->getGlobalIndex(), callNode->getOpCode().getName());
 
-   ccGlobalFunctionData *ccGlobalFunctionDataAddress =
-      reinterpret_cast<ccGlobalFunctionData *>(cg->allocateCodeMemory(sizeof(ccGlobalFunctionData), false));
+   OMR::CCData *codeCacheData = cg->getCodeCache()->manager()->getCodeCacheData();
+   OMR::CCData::index_t index;
+   codeCacheData->put(NULL, sizeof(ccGlobalFunctionData), alignof(uintptr_t), NULL, index);
+
+   ccGlobalFunctionData *ccGlobalFunctionDataAddress = codeCacheData->get<ccGlobalFunctionData>(index);
 
    if (!ccGlobalFunctionDataAddress)
       {
