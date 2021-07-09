@@ -4105,8 +4105,6 @@ void TR_LoopVersioner::versionNaturalLoop(TR_RegionStructure *whileLoop, List<TR
          TR::TreeTop *tt = search.currentTreeTop();
          TR::Node *ttNode = tt->getNode();
          culprit = ttNode;
-         if (removedNodes.contains(ttNode))
-            continue;
 
          if (ttNode->isHCRGuard())
             {
@@ -4115,6 +4113,8 @@ void TR_LoopVersioner::versionNaturalLoop(TR_RegionStructure *whileLoop, List<TR
             continue;
             }
 
+         if (removedNodes.contains(ttNode))
+            continue;
          // There is no need to identify the call nodes corresponding to HCR
          // guards. Typically none will be found by this search, but even if
          // HCR guards are removed, it's possible for such a call to be
